@@ -149,7 +149,7 @@
      <x>440</x>
      <y>760</y>
      <width>271</width>
-     <height>81</height>
+     <height>86</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout_2">
@@ -226,6 +226,13 @@
       </property>
       <property name="checked">
        <bool>false</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="getCrop">
+      <property name="text">
+       <string>Crop</string>
       </property>
      </widget>
     </item>

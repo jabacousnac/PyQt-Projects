@@ -1,16 +1,21 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5 import uic
-from PyQt5.QtCore import (pyqtSignal, pyqtSlot, pyqtProperty,
-                          QObject, QThread, QDir)
-from PyQt5.QtWidgets import (QFrame, QFileDialog)
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtCore import *#(pyqtSignal, pyqtSlot, pyqtProperty,
+                          #QObject, QThread, QDir, QRect)
+from PyQt5.QtWidgets import *#(QFrame, QFileDialog)
+from PyQt5.QtGui import *#QPixmap, QImage, QBrush, QPainter
+
+from ROI import *
+from ROI import ROI as roi
 from rayleighsommerfeld import rayleighsommerfeld
+#ROI code from https://raw.githubusercontent.com/martindurant/misc/master/ROI.py
 
 import os, io
 import numpy as np
 from PIL import Image
 from matplotlib import cm
+import matplotlib.pyplot as plt
 import cv2
 
 class QRayleighSommerfeld(QFrame):
@@ -26,8 +31,9 @@ class QRayleighSommerfeld(QFrame):
         self.openImage.clicked.connect(self.dispImage)
         self.backPropagate.clicked.connect(self.propagate)
         self.displayResultsButton.clicked.connect(self.changeDisp)
+        self.getCrop.clicked.connect(self.crop)
 
-        #handle sliders/
+        #handle sliders
         self.zmax_slider.valueChanged.connect(self.updateValues)
         self.zmin_slider.valueChanged.connect(self.updateValues)
         self.dz_slider.valueChanged.connect(self.updateValues)
@@ -37,17 +43,16 @@ class QRayleighSommerfeld(QFrame):
         self.phaseCheckbox.toggled.connect(self.handlePhaseToggled)
         self.intensityCheckbox.toggled.connect(self.handleIntToggled)
 
-#slots
-    @pyqtSlot()
     def dispImage(self):
         filename, _ = QFileDialog.getOpenFileName(self, "Open Image File", r"/home/group/data/", "Image files (*.jpg *.png")
-        self.labelImage.setPixmap(QPixmap(filename).scaled(681,511))
-        channels_count = 4
-        pixmap = QPixmap(filename)
-        image = pixmap.toImage()
-        s = image.bits().asstring(640 * 512 * channels_count)
-        arr = np.fromstring(s, dtype=np.uint8).reshape((640, 512, channels_count))
-        self.arr = arr
+        a = cv2.imread(filename, 0)
+        h, w = a.shape
+        bytesPerLine = w
+        qImg = QImage(a.data, w, h, bytesPerLine, QImage.Format_Grayscale8)
+        self.qImg = qImg
+        image = QPixmap.fromImage(qImg)
+        self.labelImage.setPixmap(image.scaled(681, 511))
+        self.arr = a
 
     def updateValues(self):
         zmax = self.zmax_slider.value()
@@ -64,7 +69,7 @@ class QRayleighSommerfeld(QFrame):
         n = int((zmax - zmin)/self.dz)
         mpp = 0.048
         z = np.linspace(zmin, zmax, n)/mpp
-        b = self.arr[:,:,0]
+        b = self.arr
         rs = rayleighsommerfeld(b, z, magnification = mpp, nozphase = True)
         bz = np.abs(rs).astype(float)
         phi = np.angle(rs - 1.)
@@ -95,7 +100,25 @@ class QRayleighSommerfeld(QFrame):
         self.labelImage.setPixmap(QPixmap(filename).scaled(681,511))
         pixmap = QPixmap(filename)
         image = pixmap.toImage()
-        
+
+    def crop(self):
+        image = self.qImg
+        image.convertToFormat(QImage.Format_ARGB32)
+        #crop
+        imgsize = min(image.width(), image.height())
+        rect = QRect(200, 100, imgsize, imgsize)
+        image = image.copy(rect)
+        crop_img = QImage(imgsize, imgsize, QImage.Format_ARGB32)
+        crop_img.fill(Qt.transparent)
+        brush = QBrush(image)
+        painter = QPainter(crop_img)
+        painter.setBrush(brush)
+        painter.setPen(Qt.blue)
+        painter.drawRect(200,100,imgsize,imgsize)
+        painter.end()
+        pm = QPixmap.fromImage(crop_img)
+        self.labelImage.setPixmap(pm.scaled(681, 511))
+
 #properties
     @pyqtProperty(str)
     def filename(self):
