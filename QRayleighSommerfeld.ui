@@ -26,7 +26,7 @@
     <item row="1" column="2">
      <widget class="QLabel" name="zmax_label">
       <property name="text">
-       <string>3</string>
+       <string>200</string>
       </property>
      </widget>
     </item>
@@ -44,6 +44,9 @@
      <widget class="QSlider" name="zmax_slider">
       <property name="maximum">
        <number>1000</number>
+      </property>
+      <property name="singleStep">
+       <number>10</number>
       </property>
       <property name="pageStep">
        <number>10</number>
@@ -86,13 +89,22 @@
     <item row="2" column="1">
      <widget class="QSlider" name="dz_slider">
       <property name="maximum">
-       <number>20</number>
+       <number>50</number>
+      </property>
+      <property name="singleStep">
+       <number>1</number>
       </property>
       <property name="pageStep">
-       <number>20</number>
+       <number>5</number>
       </property>
       <property name="value">
-       <number>1</number>
+       <number>20</number>
+      </property>
+      <property name="sliderPosition">
+       <number>20</number>
+      </property>
+      <property name="tracking">
+       <bool>true</bool>
       </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
@@ -101,14 +113,14 @@
        <enum>QSlider::TicksBelow</enum>
       </property>
       <property name="tickInterval">
-       <number>1</number>
+       <number>5</number>
       </property>
      </widget>
     </item>
     <item row="2" column="2">
      <widget class="QLabel" name="dz_label">
       <property name="text">
-       <string>1</string>
+       <string>20</string>
       </property>
      </widget>
     </item>
@@ -116,6 +128,9 @@
      <widget class="QSlider" name="zmin_slider">
       <property name="maximum">
        <number>1000</number>
+      </property>
+      <property name="singleStep">
+       <number>10</number>
       </property>
       <property name="pageStep">
        <number>10</number>
@@ -168,53 +183,58 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="QComboBox" name="comboBox">
+     <widget class="QComboBox" name="colormapSetter">
       <property name="maxCount">
        <number>20</number>
       </property>
       <item>
        <property name="text">
-        <string>Grayscale</string>
+        <string>gray</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Autum</string>
+        <string>autumn</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Coolwarm</string>
+        <string>cool</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Hot</string>
+        <string>hot</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Jet</string>
+        <string>jet</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Magma</string>
+        <string>magma</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Summer</string>
+        <string>pink</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Viridis</string>
+        <string>summer</string>
        </property>
       </item>
       <item>
        <property name="text">
-        <string>Winter</string>
+        <string>viridis</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>winter</string>
        </property>
       </item>
      </widget>

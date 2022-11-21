@@ -1,33 +1,38 @@
 # -*- coding: utf-8 -*-
 
+#pyqt imports
 from PyQt5 import uic
-from PyQt5.QtCore import *#(pyqtSignal, pyqtSlot, pyqtProperty,
-                          #QObject, QThread, QDir, QRect)
-from PyQt5.QtWidgets import *#(QFrame, QFileDialog)
-from PyQt5.QtGui import *#QPixmap, QImage, QBrush, QPainter
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
-from ROI import *
-from ROI import ROI as roi
+#local import
 from rayleighsommerfeld import rayleighsommerfeld
-#ROI code from https://raw.githubusercontent.com/martindurant/misc/master/ROI.py
 
-import os, io
+#regular imports
+import os
 import numpy as np
 from PIL import Image
+import cv2
+import matplotlib as mpl
 from matplotlib import cm
 import matplotlib.pyplot as plt
-import cv2
 
 class QRayleighSommerfeld(QFrame):
 
-    def __init__(self, parent = None):
+    def __init__(self, parent = None, zmin = 0., zmax = 200., dz = 1., phase_state = False):
+
         super(QRayleighSommerfeld, self).__init__(parent)
+        self.zmin = zmin
+        self.zmax = zmax
+        self.dz = dz
+        self.phase_state = phase_state
 
         dir = os.path.dirname(os.path.abspath(__file__))
         uifile = os.path.join(dir, 'QRayleighSommerfeld.ui')
         uic.loadUi(uifile, self)
 
-        #handle buttons/displays
+        #handle buttons
         self.openImage.clicked.connect(self.dispImage)
         self.backPropagate.clicked.connect(self.propagate)
         self.displayResultsButton.clicked.connect(self.changeDisp)
@@ -38,6 +43,9 @@ class QRayleighSommerfeld(QFrame):
         self.zmin_slider.valueChanged.connect(self.updateValues)
         self.dz_slider.valueChanged.connect(self.updateValues)
         self.setz_value.valueChanged.connect(self.updateValues)
+
+        #handle combo box
+        self.colormapSetter.currentIndexChanged.connect(self.selectionChange)
 
         #handle checkboxes
         self.phaseCheckbox.toggled.connect(self.handlePhaseToggled)
@@ -65,6 +73,7 @@ class QRayleighSommerfeld(QFrame):
         self.zdisp = zdisp
 
     def propagate(self):
+        print('propagating...')
         zmin, zmax = self.zmin, self.zmax
         n = int((zmax - zmin)/self.dz)
         mpp = 0.048
@@ -75,10 +84,7 @@ class QRayleighSommerfeld(QFrame):
         phi = np.angle(rs - 1.)
         self.phi = phi
         self.bz = bz
-        if self.phase_state:
-            print(phi)
-        else:
-            print(bz)
+        print('...propagated')
 
     def handlePhaseToggled(self,state):
         phase_state = state
@@ -95,11 +101,44 @@ class QRayleighSommerfeld(QFrame):
             arr = self.phi[:,:,int(i)]
         else:
             arr = self.bz[:,:,int(i)]
+        arr = np.array(arr, dtype = np.uint8)
+        col = self.col
+        if not self.gray:
+            arr = cv2.applyColorMap(arr, col)
+        else:
+            arr = arr
         filename = 'frame{}.png'.format(self.zdisp)
         cv2.imwrite(filename, arr)
         self.labelImage.setPixmap(QPixmap(filename).scaled(681,511))
         pixmap = QPixmap(filename)
         image = pixmap.toImage()
+
+    def selectionChange(self):
+        self.gray = False
+
+        txt = self.colormapSetter.currentText()
+        if txt == "jet":
+            self.col = 2
+        elif txt == "hot":
+            self.col = 11
+        elif txt == "pink":
+            self.col = 10
+        elif txt == "viridis":
+            self.col = 16
+        elif txt == "summer":
+            self.col = 6
+        elif txt == "autumn":
+            self.col = 0
+        elif txt == "winter":
+            self.col = 3
+        elif txt == "spring":
+            self.col = 7
+        elif txt == "magma":
+            self.col = 13
+        elif txt == "coolwarm":
+            self.col = 9
+        else:
+            self.gray = True
 
     def crop(self):
         image = self.qImg
