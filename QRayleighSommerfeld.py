@@ -20,13 +20,16 @@ import matplotlib.pyplot as plt
 
 class QRayleighSommerfeld(QFrame):
 
-    def __init__(self, parent = None, zmin = 0., zmax = 200., dz = 1., phase_state = False):
+    def __init__(self, parent = None, zmin = 0., zmax = 200., dz = 1., zdisp = 100.,\
+                 phase_state = False, gray = True):
 
         super(QRayleighSommerfeld, self).__init__(parent)
         self.zmin = zmin
         self.zmax = zmax
         self.dz = dz
         self.phase_state = phase_state
+        self.gray = gray
+        self.zdisp = zdisp
 
         dir = os.path.dirname(os.path.abspath(__file__))
         uifile = os.path.join(dir, 'QRayleighSommerfeld.ui')
@@ -102,9 +105,8 @@ class QRayleighSommerfeld(QFrame):
         else:
             arr = self.bz[:,:,int(i)]
         arr = np.array(arr, dtype = np.uint8)
-        col = self.col
-        if not self.gray:
-            arr = cv2.applyColorMap(arr, col)
+        if (self.gray == False):
+            arr = cv2.applyColorMap(arr, self.col)
         else:
             arr = arr
         filename = 'frame{}.png'.format(self.zdisp)
@@ -115,7 +117,6 @@ class QRayleighSommerfeld(QFrame):
 
     def selectionChange(self):
         self.gray = False
-
         txt = self.colormapSetter.currentText()
         if txt == "jet":
             self.col = 2

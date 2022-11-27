@@ -180,6 +180,9 @@
       <property name="text">
        <string>Intensity</string>
       </property>
+      <property name="checked">
+       <bool>true</bool>
+      </property>
      </widget>
     </item>
     <item row="2" column="1">
@@ -319,11 +322,17 @@
     </item>
     <item>
      <widget class="QSpinBox" name="setz_value">
+      <property name="buttonSymbols">
+       <enum>QAbstractSpinBox::UpDownArrows</enum>
+      </property>
       <property name="maximum">
        <number>1000</number>
       </property>
+      <property name="stepType">
+       <enum>QAbstractSpinBox::DefaultStepType</enum>
+      </property>
       <property name="value">
-       <number>200</number>
+       <number>100</number>
       </property>
      </widget>
     </item>
